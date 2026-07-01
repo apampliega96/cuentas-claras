@@ -117,7 +117,7 @@
       <div class="card">
         <h2 id="formTitle">Nuevo movimiento</h2>
         <label>Monto total a pagar</label>
-        <input type="number" id="amt" placeholder="0" inputmode="decimal">
+        <input type="text" id="amt" placeholder="0" inputmode="decimal">
 
         <label>Categoría</label>
         <div class="chips" id="catChips">
@@ -228,7 +228,7 @@
           <div data-v="nico">Nico</div>
         </div>
         <label>Monto</label>
-        <input type="number" id="incAmt" placeholder="0" inputmode="decimal">
+        <input type="text" id="incAmt" placeholder="0" inputmode="decimal">
         <label>Descripción (opcional)</label>
         <input type="text" id="incDesc" placeholder="ej: sueldo, prepaga, alquiler depto">
         <button class="btn small ghost" id="addIncomeBtn">+ Agregar</button>
@@ -306,6 +306,11 @@ function changeMonth(delta){
   loadAll();
 }
 
+function parseAmt(v){
+  if(v===null||v===undefined) return NaN;
+  return parseFloat(String(v).trim().replace(',', '.'));
+}
+
 async function loadAll(){
   document.getElementById('monthLabel').textContent = monthLabelFor(viewMonth);
   try{ const r = await window.storage.get('expenses:'+viewMonth, true); expenses = r? JSON.parse(r.value):[]; }catch(e){ expenses=[]; }
@@ -353,7 +358,7 @@ document.querySelectorAll('#interesToggle div').forEach(d=>d.addEventListener('c
 document.getElementById('cuotas').addEventListener('input', updateCuotaPreview);
 document.getElementById('amt').addEventListener('input', updateCuotaPreview);
 function updateCuotaPreview(){
-  const amt = parseFloat(document.getElementById('amt').value)||0;
+  const amt = parseAmt(document.getElementById('amt').value)||0;
   const n = parseInt(document.getElementById('cuotas').value)||1;
   const prev = document.getElementById('cuotaPreview');
   if(selectedMedio==='credito' && amt>0 && n>1){
@@ -366,7 +371,7 @@ document.querySelectorAll('#sharedToggle div').forEach(d=>d.addEventListener('cl
 }));
 
 document.getElementById('saveExpenseBtn').addEventListener('click', async ()=>{
-  const amt = parseFloat(document.getElementById('amt').value);
+  const amt = parseAmt(document.getElementById('amt').value);
   const msg = document.getElementById('saveMsg');
   msg.style.color='var(--rust)';
   if(!amt || amt<=0){ msg.textContent='Falta el monto.'; return; }
@@ -579,7 +584,7 @@ document.querySelectorAll('#incPersonToggle div').forEach(d=>d.addEventListener(
   d.classList.add('sel'); selectedIncPerson=d.dataset.v;
 }));
 document.getElementById('addIncomeBtn').addEventListener('click', async ()=>{
-  const amt = parseFloat(document.getElementById('incAmt').value);
+  const amt = parseAmt(document.getElementById('incAmt').value);
   if(!amt || amt<=0) return;
   const desc = document.getElementById('incDesc').value.trim();
   if(editingIncomeId){
