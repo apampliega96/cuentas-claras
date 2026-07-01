@@ -272,6 +272,27 @@
 </div>
 
 <script>
+// Shim: window.storage solo existe dentro de Claude. Fuera de ahí (GitHub Pages, Safari, etc.)
+// no existe, así que lo reemplazamos por localStorage con la misma interfaz get/set.
+window.storage = {
+  async get(key){
+    const v = localStorage.getItem(key);
+    return v===null ? null : {key, value:v};
+  },
+  async set(key, value){
+    localStorage.setItem(key, value);
+    return {key, value};
+  },
+  async delete(key){
+    localStorage.removeItem(key);
+    return {key, deleted:true};
+  },
+  async list(prefix){
+    const keys = Object.keys(localStorage).filter(k=>!prefix || k.startsWith(prefix));
+    return {keys};
+  }
+};
+
 let ME = null;
 const today = new Date();
 let viewMonth = today.toISOString().slice(0,7);
@@ -666,7 +687,7 @@ document.getElementById('saveMonthBtn').addEventListener('click', async ()=>{
   renderResumen();
 });
 
-function renderAll(){ renderRecent(); renderIncome(); renderDeductions(); updateAutoSplitInfo(); renderResumen(); }
+function renderAll(){ renderRecent(); renderIncome(); updateAutoSplitInfo(); renderResumen(); }
 </script>
 </body>
 </html>
